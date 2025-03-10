@@ -2,9 +2,9 @@ const Router = require('express');
 const router = new Router();
 const checkRole = require('../middleware/checkRoleMiddleware');
 
-const usersRouter = require('./usersRouter');
+const adminRouter = require('./admin/index');
 
-router.use('/user', usersRouter);
+router.use('/admin', adminRouter);
 // router.use('/billing', checkRole('USER', 'ADMINISTRATOR'), billingRouter);
 
 module.exports = router;
