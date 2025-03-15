@@ -45,7 +45,7 @@ class CategoryController {
     async delete (req, res, next) {
         try {
             let {id} = req.query;
-            Category.update({isDeleted: true}, {where: {id}})
+            await Category.update({isDeleted: true}, {where: {id}})
             return res.json("Deleted successfully");
         } catch (e) {
             next(ApiError.badRequest(e.message))

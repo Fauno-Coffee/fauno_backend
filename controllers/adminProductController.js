@@ -132,7 +132,7 @@ class ProductController {
                 farmer, 
                 keyDescriptor,
                 ...imageDetails
-            }, {where: {id}, returning});
+            }, {where: {id}, returning: true});
 
             return res.json(product[1][0])
         } catch (e) {
@@ -143,7 +143,7 @@ class ProductController {
     async delete (req, res, next) {
         try {
             let {id} = req.query;
-            Product.update({isDeleted: true}, {where: {id}})
+            await Product.update({isDeleted: true}, {where: {id}})
             return res.json("Deleted successfully");
         } catch (e) {
             next(ApiError.badRequest(e.message))
