@@ -1,6 +1,6 @@
 const Router = require('express')
 const router = new Router()
-const productController = require('../../controllers/productController')
+const productController = require('../../controllers/adminProductController')
 
 router.get('/', productController.fetch)
 router.get('/category', productController.fetchByCategory)

@@ -1,6 +1,6 @@
 const Router = require('express')
 const router = new Router()
-const categoryController = require('../../controllers/categoryController')
+const categoryController = require('../../controllers/adminCategoryController')
 
 router.get('/', categoryController.fetch)
 router.get('/:id', categoryController.fetchOne)

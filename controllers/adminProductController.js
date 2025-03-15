@@ -10,8 +10,8 @@ class ProductController {
             page = page || 1
             limit = limit || 20
             let offset = page * limit - limit
-            const product = await Product.findAndCountAll({limit, offset, order: [['name', 'ASC']], include: [{model: Category}]})
-            return res.json(product)
+            const products = await Product.findAndCountAll({limit, offset, order: [['name', 'ASC']], include: [{model: Category}]})
+            return res.json(products)
         } catch (e) {
             next(ApiError.badRequest(e.message))
         }
@@ -143,7 +143,7 @@ class ProductController {
     async delete (req, res, next) {
         try {
             let {id} = req.query;
-            Product.destroy({where: {id}})
+            Product.update({isDeleted: true}, {where: {id}})
             return res.json("Deleted successfully");
         } catch (e) {
             next(ApiError.badRequest(e.message))
