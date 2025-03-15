@@ -19,8 +19,8 @@ class ProductController {
 
     async fetchOne(req, res, next) {
         try {
-            const { id } = req.params;
-            const product = await Product.findByPk(id, {include: [{model: Category}]})
+            const { link } = req.params;
+            const product = await Product.findOne({where: {link}, include: [{model: Category}]})
             return res.json(product)
         } catch (e) {
             next(ApiError.badRequest(e.message))
@@ -44,9 +44,6 @@ class ProductController {
                 about, weight, variation, processing, fermentation,
                 region, farmer, keyDescriptor
             } = JSON.parse(req.body.data);
-    
-            let imageUrl = '';
-            let previewUrl = '';
 
             let filesPromises = []
     
@@ -99,30 +96,37 @@ class ProductController {
 
     async update(req, res, next) {
         try {
+            const files = req.files?.files;
             const {id} = req.query;
-            const file = req.files?.file;
             const {
                 name, description, link, price, old_price, categoryId,
                 about, weight, variation, processing, fermentation,
                 region, farmer, keyDescriptor
-            } = req.body;
+            } = JSON.parse(req.body.data);
+
+            let filesPromises = []
+    
+            if(files && files.length > 0){
+                filesPromises = files.map(async (file) => {
+                    if (file) {
+                        // Загрузка оригинального изображения
+                        const upload = await s3.Upload({ buffer: file.data }, '/products/');
+                        const imageUrl = upload.Key;
+    
+                        const previewBuffer = await sharp(file.data)
+                            .resize(24, 24)
+                            .toBuffer();
             
-            let imageDetails = {};
+                        // Загрузка миниатюры на S3
+                        const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/products/previews/');
+                        const previewUrl = previewUpload.Key;
     
-            if (file) {
-                // Загрузка оригинального изображения
-                let upload = await s3.Upload({ buffer: file.data }, '/prodcts/');
-                imageDetails["imageUrl"] = upload.Key;
-    
-                // Создание миниатюры 24x24px с помощью sharp
-                const previewBuffer = await sharp(file.data)
-                    .resize(24, 24)
-                    .toBuffer();
-    
-                // Загрузка миниатюры на S3
-                let previewUpload = await s3.Upload({ buffer: previewBuffer }, '/prodcts/previews/');
-                imageDetails["previewUrl"] = previewUpload.Key;
+                        return {imageUrl, previewUrl}
+                    }
+                });
             }
+
+            const filesData = await Promise.all(filesPromises);
     
             const product = await Product.update({
                 name, 
@@ -139,12 +143,13 @@ class ProductController {
                 region, 
                 farmer, 
                 keyDescriptor,
-                ...imageDetails
-            }, {where: {id}, returning: true});
-
-            return res.json(product[1][0])
+                images: filesData
+            }, {where: {id}});
+    
+            return res.json(product)
         } catch (e) {
-            next(ApiError.badRequest(e.message))
+            console.log(e)
+            next(ApiError.badRequest(e.message));
         }
     }
 

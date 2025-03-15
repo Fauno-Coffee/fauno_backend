@@ -4,7 +4,7 @@ const productController = require('../../controllers/adminProductController')
 
 router.get('/', productController.fetch)
 router.get('/category', productController.fetchByCategory)
-router.get('/:id', productController.fetchOne)
+router.get('/:link', productController.fetchOne)
 router.post('/', productController.create)
 router.put('/', productController.update)
 router.delete('/', productController.delete)

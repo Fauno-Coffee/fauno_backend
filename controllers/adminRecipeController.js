@@ -1,40 +1,78 @@
 const ApiError = require('../error/ApiError')
 const { s3 } = require('../db');
 const sharp = require('sharp');
-const {Category, Product, Recipe} = require('../models/models')
+const {Category, Product, Recipe, RecipeCategory} = require('../models/models')
 
 class RecipeController {
-    // async fetch(req, res, next) {
-    //     try {
-    //         let {page, limit} = req.query
-    //         page = page || 1
-    //         limit = limit || 20
-    //         let offset = page * limit - limit
-    //         const products = await Product.findAndCountAll({limit, offset, order: [['name', 'ASC']], include: [{model: Category}]})
-    //         return res.json(products)
-    //     } catch (e) {
-    //         next(ApiError.badRequest(e.message))
-    //     }
-    // }
-
-    // async fetchOne(req, res, next) {
-    //     try {
-    //         const { id } = req.params;
-    //         const product = await Product.findByPk(id, {include: [{model: Category}]})
-    //         return res.json(product)
-    //     } catch (e) {
-    //         next(ApiError.badRequest(e.message))
-    //     }
-    // }
+    async fetchRecipesList(req, res, next) {
+        try {
+            let {page, limit, categoryId} = req.query
+            page = page || 1
+            limit = limit || 20
+            let offset = page * limit - limit
+            const recipes = await Recipe.findAndCountAll({where: {recipeCategoryId: categoryId}, limit, offset, order: [['createdAt', 'ASC']], include: [{model: RecipeCategory}], attributes: ['id', 'name']})
+            return res.json(recipes)
+        } catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+    }
     
-    // async fetchByCategory(req, res, next) {
-    //     try {
-    //         const categories = await Category.findAll({include: [{model: Product, required: true}]})
-    //         return res.json(categories)
-    //     } catch (e) {
-    //         next(ApiError.badRequest(e.message))
-    //     }
-    // }
+    async fetchRecipe(req, res, next) {
+        try {
+            let {link} = req.params
+            const recipe = await Recipe.findOne({where: {link}, include: [{model: Product, model: RecipeCategory}]})
+            return res.json(recipe)
+        } catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+    }
+    
+    async fetchRecipeCategory(req, res, next) {
+        try {
+            const recipeCategories = await RecipeCategory.findAll()
+            return res.json(recipeCategories)
+        } catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+    }
+
+    async createRecipeCategory(req, res, next) {
+        try {
+            const file = req.files?.file;
+            const {name, description} = JSON.parse(req.body.data);
+
+            let imageUrl = '';
+            let previewUrl = '';
+
+            if (file) {
+                // Загрузка оригинального изображения
+                const upload = await s3.Upload({ buffer: file.data }, '/recipes/');
+                imageUrl = upload.Key;
+    
+                // Создание миниатюры 24x24px с помощью sharp
+
+                const previewBuffer = await sharp(file.data)
+                    .resize(24, 24)
+                    .toBuffer();
+    
+                // Загрузка миниатюры на S3
+                const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/recipes/previews/');
+                previewUrl = previewUpload.Key;
+            }
+
+            const recipeCategory = await RecipeCategory.create({
+                name,
+                description,
+                imageUrl,
+                previewUrl
+            })
+    
+            return res.json(recipeCategory)
+        } catch (e) {
+            console.log(e)
+            next(ApiError.badRequest(e.message));
+        }
+    }
 
     async createRecipe(req, res, next) {
         try {
@@ -86,6 +124,104 @@ class RecipeController {
                 steps: recipeData,
                 productId
             })
+    
+            return res.json(recipe)
+        } catch (e) {
+            console.log(e)
+            next(ApiError.badRequest(e.message));
+        }
+    }
+    
+    async updateRecipeCategory(req, res, next) {
+        try {
+            const {id} = req.query;
+            const file = req.files?.file;
+            const {name, description} = JSON.parse(req.body.data);
+
+            let imageUrl = '';
+            let previewUrl = '';
+
+            if (file) {
+                // Загрузка оригинального изображения
+                const upload = await s3.Upload({ buffer: file.data }, '/recipes/');
+                imageUrl = upload.Key;
+    
+                // Создание миниатюры 24x24px с помощью sharp
+
+                const previewBuffer = await sharp(file.data)
+                    .resize(24, 24)
+                    .toBuffer();
+    
+                // Загрузка миниатюры на S3
+                const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/recipes/previews/');
+                previewUrl = previewUpload.Key;
+            }
+
+            const recipeCategory = await RecipeCategory.update({
+                name,
+                description,
+                imageUrl,
+                previewUrl
+            }, {where: {id}})
+    
+            return res.json(recipeCategory)
+        } catch (e) {
+            console.log(e)
+            next(ApiError.badRequest(e.message));
+        }
+    }
+
+    async updateRecipe(req, res, next) {
+        try {
+            const {id} = req.query;
+            const files = req.files?.files;
+            const {name, link, categoryId, productId, recipeSteps} = JSON.parse(req.body.data);
+
+            let filesPromises = []
+            
+            if(files && files.length > 0){
+                filesPromises = files.map(async (file) => {
+                    if (file) {
+                        // Загрузка оригинального изображения
+                        const upload = await s3.Upload({ buffer: file.data }, '/recipes/');
+                        const imageUrl = upload.Key;
+            
+                        // Создание миниатюры 24x24px с помощью sharp
+    
+                        const previewBuffer = await sharp(file.data)
+                            .resize(24, 24)
+                            .toBuffer();
+            
+                        // Загрузка миниатюры на S3
+                        const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/recipes/previews/');
+                        const previewUrl = previewUpload.Key;
+    
+                        return {imageUrl, previewUrl, name: file.name}
+                    }
+                });
+            }
+
+            const filesData = await Promise.all(filesPromises);
+
+            const recipeData = recipeSteps.map((element) => {
+                let fileData = {}
+                
+                if(element.fileName){
+                    console.log(`search file ${element.fileName}`)
+                    fileData = filesData.find(file => file.name === element.fileName)
+                    console.log(fileData)
+                }
+
+                return {text: element.text, ...fileData}
+            })
+
+            const recipe = await Recipe.update({
+                recipeCategoryId: categoryId,
+                link,
+                name,
+                steps: recipeData,
+                productId
+            }, {where: {id}})
     
             return res.json(recipe)
         } catch (e) {
