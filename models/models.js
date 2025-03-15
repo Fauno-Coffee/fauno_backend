@@ -27,8 +27,7 @@ const Product = sequelize.define('product', {
   name: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
   description: { type: DataTypes.TEXT, unique: false, allowNull: false, defaultValue: '' },
   link: { type: DataTypes.STRING, unique: true, allowNull: false, defaultValue: '' },
-  imageUrl: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
-  previewUrl: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
+  images: { type: DataTypes.JSON, unique: false, allowNull: false},
   price: { type: DataTypes.FLOAT, unique: false, allowNull: false, defaultValue: 0 },
   old_price: { type: DataTypes.FLOAT, unique: false, allowNull: false, defaultValue: 0 },
   categoryId: { type: DataTypes.INTEGER, unique: false, allowNull: true },
@@ -69,6 +68,27 @@ const CartProduct = sequelize.define('cartProduct', {
   count: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
 });
 
+const RecipeCategory = sequelize.define('recipeCategory', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.TEXT, unique: false, allowNull: false},
+  description: { type: DataTypes.TEXT, unique: false, allowNull: false},
+  imageUrl: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
+  previewUrl: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
+  
+  isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
+});
+
+const Recipe = sequelize.define('recipe', {
+  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+  link: { type: DataTypes.STRING, unique: true, allowNull: false, defaultValue: '' },
+  recipeCategoryId: { type: DataTypes.INTEGER, allowNull: false },
+  name: { type: DataTypes.TEXT, unique: false, allowNull: false},
+  steps: { type: DataTypes.JSON, unique: false, allowNull: false},
+  productId: { type: DataTypes.INTEGER, allowNull: true },
+  
+  isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
+});
+
 Product.belongsTo(Category)
 Category.hasMany(Product);
 
@@ -85,11 +105,18 @@ Product.hasMany(CartProduct);
 CartProduct.belongsTo(User)
 User.hasMany(CartProduct);
 
+Recipe.belongsTo(Product)
+Product.hasMany(Recipe);
+Recipe.belongsTo(RecipeCategory)
+RecipeCategory.hasMany(Recipe);
+
 module.exports = {
   User,
   Category,
   Product,
   Order,
   OrderProduct,
-  CartProduct
+  CartProduct,
+  Recipe,
+  RecipeCategory
 };

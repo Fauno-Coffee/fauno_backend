@@ -66,7 +66,6 @@ class OrderController {
         try {
             let {id} = req.query;
             const order = await Order.update({state: "canceled"}, {where: {id}, returning: true})
-            console.log(order)
             const updatedOrder = order[1][0]
             await updateUserCategory(updatedOrder.userId)
             return res.json("Canceled successfully");

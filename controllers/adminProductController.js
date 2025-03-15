@@ -38,30 +38,39 @@ class ProductController {
 
     async create(req, res, next) {
         try {
-            const file = req.files?.file;
+            const files = req.files?.files;
             const {
                 name, description, link, price, old_price, categoryId,
                 about, weight, variation, processing, fermentation,
                 region, farmer, keyDescriptor
-            } = req.body;
+            } = JSON.parse(req.body.data);
     
             let imageUrl = '';
             let previewUrl = '';
+
+            let filesPromises = []
     
-            if (file) {
-                // Загрузка оригинального изображения
-                let upload = await s3.Upload({ buffer: file.data }, '/prodcts/');
-                imageUrl = upload.Key;
+            if(files && files.length > 0){
+                filesPromises = files.map(async (file) => {
+                    if (file) {
+                        // Загрузка оригинального изображения
+                        const upload = await s3.Upload({ buffer: file.data }, '/products/');
+                        const imageUrl = upload.Key;
     
-                // Создание миниатюры 24x24px с помощью sharp
-                const previewBuffer = await sharp(file.data)
-                    .resize(24, 24)
-                    .toBuffer();
+                        const previewBuffer = await sharp(file.data)
+                            .resize(24, 24)
+                            .toBuffer();
+            
+                        // Загрузка миниатюры на S3
+                        const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/products/previews/');
+                        const previewUrl = previewUpload.Key;
     
-                // Загрузка миниатюры на S3
-                let previewUpload = await s3.Upload({ buffer: previewBuffer }, '/prodcts/previews/');
-                previewUrl = previewUpload.Key;
+                        return {imageUrl, previewUrl}
+                    }
+                });
             }
+
+            const filesData = await Promise.all(filesPromises);
     
             const product = await Product.create({
                 name, 
@@ -78,8 +87,7 @@ class ProductController {
                 region, 
                 farmer, 
                 keyDescriptor,
-                imageUrl,
-                previewUrl
+                images: filesData
             });
     
             return res.json(product)

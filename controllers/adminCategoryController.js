@@ -24,7 +24,6 @@ class CategoryController {
     async create(req, res, next) {
         try {
             const {name} = req.body
-            console.log(name)
             const category = await Category.create({name})
             return res.json(category)
         } catch (e) {
