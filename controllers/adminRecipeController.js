@@ -10,7 +10,7 @@ class RecipeController {
             page = page || 1
             limit = limit || 20
             let offset = page * limit - limit
-            const recipes = await Recipe.findAndCountAll({where: {recipeCategoryId: categoryId}, limit, offset, order: [['createdAt', 'ASC']], include: [{model: RecipeCategory}], attributes: ['id', 'name']})
+            const recipes = await Recipe.findAndCountAll({where: {recipeCategoryId: categoryId}, limit, offset, order: [['createdAt', 'ASC']], include: [{model: RecipeCategory}, {model: Product}]})
             return res.json(recipes)
         } catch (e) {
             next(ApiError.badRequest(e.message))
