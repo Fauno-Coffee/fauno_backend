@@ -12,7 +12,10 @@ class ProductController {
             let offset = page * limit - limit
             
             const products = await Product.findAndCountAll({
-                ...(categoryId ? {where: {categoryId}} : {}),
+                where: {
+                    isDeleted: false,
+                    ...(categoryId ? {categoryId} : {}),
+                },
                 limit, offset, order: [['name', 'ASC']], include: [{model: Category}]
             })
 
