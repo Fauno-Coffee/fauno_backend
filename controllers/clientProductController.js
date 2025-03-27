@@ -2,19 +2,26 @@ const ApiError = require('../error/ApiError')
 const { s3 } = require('../db');
 const sharp = require('sharp');
 const {Category, Product} = require('../models/models')
+const Op = require('sequelize').Op;
 
 class ProductController {
     async fetch(req, res, next) {
         try {
             let {page, limit, categoryId} = req.query
             page = page || 1
-            limit = limit || 20
+            limit = limit || 100
             let offset = page * limit - limit
+
+            const categories = await Category.findAll({where: {isDeleted: false,
+                [Op.or]: [{id: categoryId}, {parentId: categoryId}]
+            }})
+
+            const categoryIds = categories.map((category) => category.id)
             
             const products = await Product.findAndCountAll({
                 where: {
                     isDeleted: false,
-                    ...(categoryId ? {categoryId} : {}),
+                    ...(categoryId ? {categoryId: {[Op.in]: categoryIds}} : {}),
                 },
                 limit, offset, order: [['name', 'ASC']], include: [{model: Category}]
             })

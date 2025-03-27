@@ -8,7 +8,7 @@ class ProductController {
         try {
             let {page, limit} = req.query
             page = page || 1
-            limit = limit || 20
+            limit = limit || 1000
             let offset = page * limit - limit
             const products = await Product.findAndCountAll({limit, offset, order: [['name', 'ASC']], include: [{model: Category}]})
             return res.json(products)
@@ -38,7 +38,10 @@ class ProductController {
 
     async create(req, res, next) {
         try {
-            const files = req.files?.files;
+            let files = req.files?.files;
+            if(!files.length){
+                files = [files]
+            }
             const {
                 name, description, link, price, old_price, categoryId,
                 about, weight, variation, processing, fermentation,
@@ -48,6 +51,8 @@ class ProductController {
             let filesPromises = []
     
             if(files && files.length > 0){
+                console.log("files")
+                console.log(files)
                 filesPromises = files.map(async (file) => {
                     if (file) {
                         // Загрузка оригинального изображения
@@ -96,7 +101,10 @@ class ProductController {
 
     async update(req, res, next) {
         try {
-            const files = req.files?.files;
+            let files = req.files?.files;
+            if(!files.length){
+                files = [files]
+            }
             const {id} = req.query;
             const {
                 name, description, link, price, old_price, categoryId,
