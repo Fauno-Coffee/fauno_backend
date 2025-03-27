@@ -21,7 +21,7 @@ const Category = sequelize.define('category', {
   name: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
   link: { type: DataTypes.STRING, unique: true, allowNull: false, defaultValue: '' },
   description: { type: DataTypes.TEXT, unique: true, allowNull: false, defaultValue: '' },
-  parentId: { type: DataTypes.INTEGER, unique: false, allowNull: false, defaultValue: '' },
+  parentId: { type: DataTypes.INTEGER, unique: false, allowNull: true },
   isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
 });
 
