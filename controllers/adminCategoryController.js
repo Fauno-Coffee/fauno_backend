@@ -23,8 +23,8 @@ class CategoryController {
 
     async create(req, res, next) {
         try {
-            const {name, link, parentId} = req.body
-            const category = await Category.create({name, link, parentId})
+            const {name, link, parentId, description} = req.body
+            const category = await Category.create({name, link, parentId, description})
             return res.json(category)
         } catch (e) {
             next(ApiError.badRequest(e.message))
@@ -33,8 +33,8 @@ class CategoryController {
     async update(req, res, next) {
         try {
             const {id} = req.query;
-            const {name, link, parentId} = req.body
-            const category = await Category.update({name, link, parentId}, {where: {id}, returning: true})
+            const {name, link, parentId, description} = req.body
+            const category = await Category.update({name, link, parentId, description}, {where: {id}, returning: true})
             return res.json(category[1][0])
         } catch (e) {
             next(ApiError.badRequest(e.message))
