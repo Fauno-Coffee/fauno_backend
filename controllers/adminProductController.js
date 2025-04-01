@@ -45,7 +45,7 @@ class ProductController {
             const {
                 name, description, link, price, old_price, categoryId,
                 about, weight, variation, processing, fermentation,
-                region, farmer, keyDescriptor
+                region, farmer, keyDescriptor, brightness
             } = JSON.parse(req.body.data);
 
             let filesPromises = []
@@ -89,6 +89,7 @@ class ProductController {
                 region, 
                 farmer, 
                 keyDescriptor,
+                brightness,
                 images: filesData
             });
     
@@ -109,7 +110,7 @@ class ProductController {
             const {
                 name, description, link, price, old_price, categoryId,
                 about, weight, variation, processing, fermentation,
-                region, farmer, keyDescriptor
+                region, farmer, keyDescriptor, brightness
             } = JSON.parse(req.body.data);
 
             let filesPromises = []
@@ -151,6 +152,7 @@ class ProductController {
                 region, 
                 farmer, 
                 keyDescriptor,
+                brightness,
                 images: filesData
             }, {where: {id}});
     

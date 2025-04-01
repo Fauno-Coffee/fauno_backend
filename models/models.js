@@ -46,6 +46,8 @@ const Product = sequelize.define('product', {
   farmer: { type: DataTypes.STRING, allowNull: true },
   keyDescriptor: { type: DataTypes.STRING, allowNull: true },
   
+  brightness: { type: DataTypes.INTEGER, unique: false, defaultValue: 5 },
+  
   isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
 });
 
