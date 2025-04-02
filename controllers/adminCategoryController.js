@@ -33,7 +33,7 @@ class CategoryController {
 
             if (file) {
                 // Загрузка оригинального изображения
-                const upload = await s3.Upload({ buffer: file.data }, '/recipes/');
+                const upload = await s3.Upload({ buffer: file.data }, '/categories/');
                 imageUrl = upload.Key;
     
                 // Создание миниатюры 24x24px с помощью sharp
@@ -43,7 +43,7 @@ class CategoryController {
                     .toBuffer();
     
                 // Загрузка миниатюры на S3
-                const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/recipes/previews/');
+                const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/categories/previews/');
                 previewUrl = previewUpload.Key;
             }
 
@@ -64,7 +64,7 @@ class CategoryController {
 
             if (file) {
                 // Загрузка оригинального изображения
-                const upload = await s3.Upload({ buffer: file.data }, '/recipes/');
+                const upload = await s3.Upload({ buffer: file.data }, '/categories/');
                 imageUrl = upload.Key;
     
                 // Создание миниатюры 24x24px с помощью sharp
@@ -74,7 +74,7 @@ class CategoryController {
                     .toBuffer();
     
                 // Загрузка миниатюры на S3
-                const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/recipes/previews/');
+                const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/categories/previews/');
                 previewUrl = previewUpload.Key;
             }
 
