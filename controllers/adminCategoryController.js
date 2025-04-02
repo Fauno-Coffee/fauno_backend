@@ -1,5 +1,7 @@
 const ApiError = require('../error/ApiError')
 const {User, Category, Product} = require('../models/models')
+const { s3 } = require('../db');
+const sharp = require('sharp');
 
 class CategoryController {
     async fetch(req, res, next) {
@@ -23,8 +25,29 @@ class CategoryController {
 
     async create(req, res, next) {
         try {
-            const {name, link, parentId, description} = req.body
-            const category = await Category.create({name, link, parentId, description})
+            const file = req.files?.file;
+            const {name, link, parentId, description} = JSON.parse(req.body.data);
+
+            let imageUrl = '';
+            let previewUrl = '';
+
+            if (file) {
+                // Загрузка оригинального изображения
+                const upload = await s3.Upload({ buffer: file.data }, '/recipes/');
+                imageUrl = upload.Key;
+    
+                // Создание миниатюры 24x24px с помощью sharp
+
+                const previewBuffer = await sharp(file.data)
+                    .resize(24, 24)
+                    .toBuffer();
+    
+                // Загрузка миниатюры на S3
+                const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/recipes/previews/');
+                previewUrl = previewUpload.Key;
+            }
+
+            const category = await Category.create({name, link, parentId, description, imageUrl, previewUrl})
             return res.json(category)
         } catch (e) {
             next(ApiError.badRequest(e.message))
@@ -33,8 +56,29 @@ class CategoryController {
     async update(req, res, next) {
         try {
             const {id} = req.query;
-            const {name, link, parentId, description} = req.body
-            const category = await Category.update({name, link, parentId, description}, {where: {id}, returning: true})
+            const file = req.files?.file;
+            const {name, link, parentId, description} = JSON.parse(req.body.data);
+
+            let imageUrl = '';
+            let previewUrl = '';
+
+            if (file) {
+                // Загрузка оригинального изображения
+                const upload = await s3.Upload({ buffer: file.data }, '/recipes/');
+                imageUrl = upload.Key;
+    
+                // Создание миниатюры 24x24px с помощью sharp
+
+                const previewBuffer = await sharp(file.data)
+                    .resize(24, 24)
+                    .toBuffer();
+    
+                // Загрузка миниатюры на S3
+                const previewUpload = await s3.Upload({ buffer: previewBuffer }, '/recipes/previews/');
+                previewUrl = previewUpload.Key;
+            }
+
+            const category = await Category.update({name, link, parentId, description, imageUrl, previewUrl}, {where: {id}, returning: true})
             return res.json(category[1][0])
         } catch (e) {
             next(ApiError.badRequest(e.message))
