@@ -1,6 +1,6 @@
 const ApiError = require('../error/ApiError')
 const jwt = require('jsonwebtoken')
-const {User, Order, CartProduct, Product} = require('../models/models')
+const {User, Order, CartProduct, Product, Session} = require('../models/models')
 const Op = require('sequelize').Op;
 const PNF = require('google-libphonenumber').PhoneNumberFormat;
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
@@ -36,6 +36,15 @@ class UsersController {
 
         return res.json(formattedPhone)
     }
+    
+    async session(req, res, next) {
+        try{
+            const session = await Session.create()
+            return res.json(session.id)
+        } catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+    }
  
     async check(req, res, next) {
         try {
@@ -68,14 +77,14 @@ class UsersController {
 
     async fetchOrders(req, res, next) {
         try {
-            const { id } = req.body;
+            const { userId } = req.body;
 
-            if(id != req.user.id){
+            if(userId != req.user.id){
                 return next(ApiError.internal(`Ошибка доступа`))
             }
 
             const orders = await Order.findAll({
-                where: {userId: id},
+                where: {userId},
                 include: [{model: Product, required: true}]
             });
 
@@ -87,11 +96,16 @@ class UsersController {
     
     async fetchCart(req, res, next) {
         try {
-            const { id, session } = req.body;
+            const { userId, session } = req.query;
+
+            const or = [];
+            if (userId)  or.push({ userId });
+            if (session) or.push({ session });
 
             const cartProducts = await CartProduct.findAll({
-                where: {[Op.or]: [{userId: id}, {session}]},
-                include: [{model: Product, required: true}]
+                where: {[Op.or]: or},
+                include: [{model: Product, required: true}],
+                order: [["createdAt", "ASC"]]
             });
 
             return res.json(cartProducts);
@@ -101,35 +115,48 @@ class UsersController {
         }
     }
     
-    async plusCart(req, res, next) {
+    async plusCart (req, res, next) {
         try {
-            const { id, session, productId } = req.body;
-
-            const product = await Product.findByPk(productId)
-
-            if(!product){
-                return next(ApiError.internal('Товар не найден'))
+          const { userId, session, productId } = req.body;
+      
+          if (!productId)
+            return next(ApiError.badRequest('productId обязателен'));
+      
+          if (!userId && !session)
+            return next(ApiError.badRequest('Нужен либо userId, либо session'));
+      
+          const product = await Product.findByPk(productId);
+          if (!product)
+            return next(ApiError.internal('Товар не найден'));
+      
+          const or = [];
+          if (userId)  or.push({ userId });
+          if (session) or.push({ session });
+      
+          const cartProduct = await CartProduct.findOne({
+            where: {
+              productId,
+              [Op.or]: or
             }
-
-            const cartProduct = await CartProduct.findOne({
-                where: {[Op.or]: [{userId: id}, {session}], productId}
-            });
-
-            if(cartProduct){
-                await cartProduct.increment('count')
-            } else {
-                await CartProduct.create({userId: id, session, productId, count: 1})
-            }
-
-            return res.json("success");
+          });
+      
+          if (cartProduct) {
+            await cartProduct.increment('count');
+          } else {
+            const createData = { session, productId, count: 1 };
+            if (userId) createData.userId = userId;
+            await CartProduct.create(createData);
+          }
+      
+          return res.json('success');
         } catch (e) {
-            return next(ApiError.badRequest(e.message))
+          return next(ApiError.badRequest(e.message));
         }
-    }
+      }
     
     async minusCart(req, res, next) {
         try {
-            const { id, session, productId } = req.body;
+            const { userId, session, productId } = req.body;
 
             const product = await Product.findByPk(productId)
 
@@ -137,8 +164,15 @@ class UsersController {
                 return next(ApiError.internal('Товар не найден'))
             }
 
+            const or = [];
+            if (userId)  or.push({ userId });
+            if (session) or.push({ session });
+      
             const cartProduct = await CartProduct.findOne({
-                where: {[Op.or]: [{userId: id}, {session}], productId}
+                where: {
+                productId,
+                [Op.or]: or
+                }
             });
 
             if(!cartProduct){

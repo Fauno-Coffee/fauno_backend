@@ -96,8 +96,21 @@ const Recipe = sequelize.define('recipe', {
   isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
 });
 
+const Session = sequelize.define('session', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+    allowNull: false
+  },
+  userId: {type: DataTypes.INTEGER, unique: false, allowNull: true}
+});
+
 Product.belongsTo(Category)
 Category.hasMany(Product);
+
+Session.belongsTo(User)
+User.hasMany(Session);
 
 Order.belongsTo(User)
 User.hasMany(Order);
@@ -125,5 +138,6 @@ module.exports = {
   OrderProduct,
   CartProduct,
   Recipe,
-  RecipeCategory
+  RecipeCategory,
+  Session
 };
