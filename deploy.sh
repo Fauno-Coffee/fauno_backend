@@ -7,6 +7,6 @@ if pm2 describe $APP_NAME > /dev/null; then
 fi
 
 echo "Starting new $APP_NAME process"
-pm2 start index.js --name $APP_NAME --watch
+NODE_ENV=production pm2 start index.js --name $APP_NAME --watch
 
 pm2 save
