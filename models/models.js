@@ -90,6 +90,8 @@ const RecipeCategory = sequelize.define('recipeCategory', {
 const Recipe = sequelize.define('recipe', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   link: { type: DataTypes.STRING, unique: true, allowNull: false, defaultValue: '' },
+  imageUrl: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
+  description: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
   recipeCategoryId: { type: DataTypes.INTEGER, allowNull: false },
   name: { type: DataTypes.TEXT, unique: false, allowNull: false},
   steps: { type: DataTypes.JSON, unique: false, allowNull: false},

@@ -7,10 +7,14 @@ class RecipeController {
     async fetchRecipesList(req, res, next) {
         try {
             let {page, limit, categoryId} = req.query
+            let where = {}
+            if(categoryId){
+                where.recipeCategoryId = categoryId;
+            }
             page = page || 1
-            limit = limit || 20
+            limit = limit || 100
             let offset = page * limit - limit
-            const recipes = await Recipe.findAndCountAll({where: {recipeCategoryId: categoryId}, limit, offset, order: [['createdAt', 'ASC']], include: [{model: RecipeCategory}, {model: Product}]})
+            const recipes = await Recipe.findAndCountAll({where, limit, offset, order: [['createdAt', 'ASC']], include: [{model: RecipeCategory}, {model: Product}]})
             return res.json(recipes)
         } catch (e) {
             next(ApiError.badRequest(e.message))
@@ -77,7 +81,8 @@ class RecipeController {
     async createRecipe(req, res, next) {
         try {
             const files = req.files?.files;
-            const {name, link, categoryId, productId, recipeSteps} = JSON.parse(req.body.data);
+            const image = req.files?.file;
+            const {name, link, description, categoryId, productId, recipeSteps} = JSON.parse(req.body.data);
 
             let filesPromises = []
             
@@ -103,6 +108,13 @@ class RecipeController {
                 });
             }
 
+            let imageUrl = ""
+            
+            if(image){
+                const upload = await s3.Upload({ buffer: image.data }, '/recipes/');
+                imageUrl = upload.Key;
+            }
+
             const filesData = await Promise.all(filesPromises);
 
             const recipeData = recipeSteps.map((element) => {
@@ -122,7 +134,9 @@ class RecipeController {
                 link,
                 name,
                 steps: recipeData,
-                productId
+                productId,
+                description,
+                imageUrl
             })
     
             return res.json(recipe)
@@ -175,7 +189,8 @@ class RecipeController {
         try {
             const {id} = req.query;
             const files = req.files?.files;
-            const {name, link, categoryId, productId, recipeSteps} = JSON.parse(req.body.data);
+            const image = req.files?.file;
+            const {name, link, description, categoryId, productId, recipeSteps} = JSON.parse(req.body.data);
 
             let filesPromises = []
             
@@ -201,6 +216,13 @@ class RecipeController {
                 });
             }
 
+            let imageUrl = ""
+            
+            if(image){
+                const upload = await s3.Upload({ buffer: image.data }, '/recipes/');
+                imageUrl = upload.Key;
+            }
+
             const filesData = await Promise.all(filesPromises);
 
             const recipeData = recipeSteps.map((element) => {
@@ -220,7 +242,9 @@ class RecipeController {
                 link,
                 name,
                 steps: recipeData,
-                productId
+                productId,
+                imageUrl,
+                description
             }, {where: {id}})
     
             return res.json(recipe)
