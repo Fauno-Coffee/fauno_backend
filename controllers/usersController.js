@@ -99,6 +99,21 @@ class UsersController {
     }
   }
 
+  async update(req, res, next) {
+    try {
+      const {name, phone, mail} = req.body;
+
+      const user = await User.findOne({where: {id: req.user.id}})
+
+      await user.update({name, phone, mail})
+
+      return res.json({user})
+
+    } catch (e) {
+      return next(ApiError.badRequest(e.message))
+    }
+  }
+
   async fetch(req, res, next) {
     try {
       const {id} = req.params;
