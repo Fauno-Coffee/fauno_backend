@@ -4,6 +4,7 @@ const usersController = require('../../controllers/usersController')
 const authMiddleware = require('../../middleware/authMiddleware')
 
 router.post('/login', usersController.login)
+router.post('/login/sms', usersController.checkLoginSMSCode)
 // router.get('/find_email', usersController.find_mail)
 // router.post('/recovery_password', usersController.recovery_password)
 // router.post('/check_code', usersController.check_code)

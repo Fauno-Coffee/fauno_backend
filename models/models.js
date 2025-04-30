@@ -14,6 +14,7 @@ const User = sequelize.define('user', {
   category: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: 'Basic' },
   discount: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: true },
   total: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: true },
+  smsCode: { type: DataTypes.SMALLINT, allowNull: true },
 });
 
 const Category = sequelize.define('category', {
