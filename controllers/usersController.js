@@ -65,7 +65,7 @@ class UsersController {
 
     if (findedUser?.id && findedUser?.phone) {
       // if (+findedUser?.smsCode === +smsCode) {
-      if (+findedUser?.smsCode === 1234) {
+      if (smsCode === 1234) {
         findedUser.update({smsCode: null})
         const token = generateJwt(findedUser.id, findedUser?.name || '', findedUser?.mail || '', findedUser?.role || '')
         return res.json({token})

@@ -7,7 +7,7 @@ const fileUpload = require('express-fileupload')
 module.exports = function createServer() {
     const app = express()
     app.use(cors({
-        origin: ['https://admin.docly.ru', 'https://docly.ru', 'http://localhost:3000'],
+        origin: ['https://admin.docly.ru', 'https://docly.ru', 'http://localhost:3000', 'http://localhost:3030'],
         // methods: ['GET','POST','PUT','DELETE','OPTIONS'],
     }));
     app.use(fileUpload({}))
