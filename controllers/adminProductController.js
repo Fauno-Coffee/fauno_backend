@@ -45,10 +45,15 @@ class ProductController {
             const {
                 name, description, link, price, old_price, categoryId,
                 about, weight, variation, processing, fermentation,
-                region, farmer, keyDescriptor, brightness
+                region, farmer, keyDescriptor, brightness, recipe
             } = JSON.parse(req.body.data);
 
             let filesPromises = []
+
+            let recipeJSON = "" 
+            if(recipe){
+                recipeJSON = JSON.parse(recipe)
+            }
     
             if(files && files.length > 0){
                 console.log("files")
@@ -90,7 +95,8 @@ class ProductController {
                 farmer, 
                 keyDescriptor,
                 brightness,
-                images: filesData
+                images: filesData,
+                recipe: recipeJSON
             });
     
             return res.json(product)
@@ -110,8 +116,14 @@ class ProductController {
             const {
                 name, description, link, price, old_price, categoryId,
                 about, weight, variation, processing, fermentation,
-                region, farmer, keyDescriptor, brightness
+                region, farmer, keyDescriptor, brightness, recipe
             } = JSON.parse(req.body.data);
+
+
+            let recipeJSON = "" 
+            if(recipe){
+                recipeJSON = JSON.parse(recipe)
+            }
 
             let filesPromises = []
     
@@ -153,7 +165,8 @@ class ProductController {
                 farmer, 
                 keyDescriptor,
                 brightness,
-                images: filesData
+                images: filesData,
+                recipe: recipeJSON
             }, {where: {id}});
     
             return res.json(product)

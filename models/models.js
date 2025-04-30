@@ -40,6 +40,7 @@ const Product = sequelize.define('product', {
   count: { type: DataTypes.INTEGER, unique: false, defaultValue: 0 },
   
   about: { type: DataTypes.TEXT, unique: false, allowNull: false, defaultValue: '' },
+  recipe: { type: DataTypes.JSON, unique: false, allowNull: true },
   
   weight: { type: DataTypes.INTEGER, unique: false, allowNull: true },
   variation: {type: DataTypes.ARRAY(DataTypes.STRING)},
