@@ -47,15 +47,11 @@ class UsersController {
     //   }
     // }
 
-    if (session) {
-      await CartProduct.update({userId: findedUser.id}, {where: {session, userId: null}})
-    }
-
     return res.json(phone)
   }
 
   async checkLoginSMSCode(req, res, next) {
-    const {phone, smsCode} = req.body
+    const {phone, smsCode, session} = req.body
 
     if (!phoneUtil.isValidNumberForRegion(phoneUtil.parse(phone, 'RU'), 'RU')) {
       return next(ApiError.internal('Неверный формат номера'))
@@ -68,7 +64,12 @@ class UsersController {
       if (+smsCode === 1234) {
         findedUser.update({smsCode: null})
         const token = generateJwt(findedUser.id, findedUser?.name || '', findedUser?.mail || '', findedUser?.role || '')
-        return res.json({token})
+
+        if (session) {
+          await CartProduct.update({userId: findedUser.id}, {where: {session, userId: null}})
+        }
+
+        return res.json({token, user: findedUser})
       } else {
         next(ApiError.unprocessable('Неверный код'))
       }
@@ -91,7 +92,7 @@ class UsersController {
       const user = await User.findOne({where: {id: req.user.id}})
 
       const token = generateJwt(user.id, user.name, user.mail, user.phone, user.role)
-      return res.json({token})
+      return res.json({token, user})
 
     } catch (e) {
       return next(ApiError.badRequest(e.message))
