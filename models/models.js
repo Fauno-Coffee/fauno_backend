@@ -28,6 +28,12 @@ const Category = sequelize.define('category', {
   isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
 });
 
+const BlockData = sequelize.define('blockData', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
+  data: { type: DataTypes.JSON, unique: false, allowNull: false, defaultValue: '' },
+});
+
 const Product = sequelize.define('product', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
@@ -143,5 +149,6 @@ module.exports = {
   CartProduct,
   Recipe,
   RecipeCategory,
-  Session
+  Session,
+  BlockData
 };
