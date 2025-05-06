@@ -33,6 +33,12 @@ class ProductController {
                 limit, offset, order: [['name', 'ASC']], include: [{ model: Category }]
             })
 
+            if (categories.length > 0) {
+                console.log("add category")
+                products.category = categories[0]
+            }
+            console.log(products)
+
             return res.json(products)
         } catch (e) {
             next(ApiError.badRequest(e.message))

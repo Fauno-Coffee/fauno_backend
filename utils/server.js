@@ -8,6 +8,7 @@ module.exports = function createServer() {
     const app = express()
     app.use(cors({
         origin: ['https://admin.docly.ru', 'https://docly.ru', 'http://localhost:3000', 'http://localhost:3030'],
+        // origin: '*',
         // methods: ['GET','POST','PUT','DELETE','OPTIONS'],
     }));
     app.use(fileUpload({}))
