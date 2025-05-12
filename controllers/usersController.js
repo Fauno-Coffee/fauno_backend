@@ -27,25 +27,25 @@ class UsersController {
       findedUser.update({smsCode: code})
     }
 
-    // if (code && findedUser?.phone) {
-    //   try {
-    //     const url = process.env.SMS_AERO_URL
-    //     const response = await axios.get(url, {
-    //       params: {
-    //         number: findedUser?.phone,
-    //         text: `Fauno Код подтверждения ${code}`,
-    //         sign: 'SMS Aero',
-    //       },
-    //       headers: {
-    //         'Authorization': 'Basic ' + Buffer.from(`${process.env.SMS_AERO_LOGIN}:${process.env.SMS_AERO_TOKEN}`).toString('base64'),
-    //         'Accept': '*/*',
-    //       },
-    //     });
-    //   } catch (e) {
-    //     console.log(e)
-    //     return next(ApiError.internal('Ошибка при отправке SMS с кодом подтверждения, попробуйте позднее'))
-    //   }
-    // }
+    if (code && findedUser?.phone) {
+      try {
+        const url = process.env.SMS_AERO_URL
+        const response = await axios.get(url, {
+          params: {
+            number: findedUser?.phone,
+            text: `Fauno Код подтверждения ${code}`,
+            sign: 'SMS Aero',
+          },
+          headers: {
+            'Authorization': 'Basic ' + Buffer.from(`${process.env.SMS_AERO_LOGIN}:${process.env.SMS_AERO_TOKEN}`).toString('base64'),
+            'Accept': '*/*',
+          },
+        });
+      } catch (e) {
+        console.log(e)
+        return next(ApiError.internal('Ошибка при отправке SMS с кодом подтверждения, попробуйте позднее'))
+      }
+    }
 
     return res.json(phone)
   }
