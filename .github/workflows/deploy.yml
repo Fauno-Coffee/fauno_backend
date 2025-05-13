@@ -25,6 +25,8 @@ jobs:
           SMS_AERO_URL: ${{ secrets.SMS_AERO_URL }}
           SMS_AERO_LOGIN: ${{ secrets.SMS_AERO_LOGIN }}
           SMS_AERO_TOKEN: ${{ secrets.SMS_AERO_TOKEN }}
+          CP_PUBLIC_ID: ${{ secrets.CP_PUBLIC_ID }}
+          CP_PRIVATE_KEY: ${{ secrets.CP_PRIVATE_KEY }}
         run: |
           cat <<EOF > .env.production
           DB_NAME=$DB_NAME
@@ -40,6 +42,9 @@ jobs:
           SMS_AERO_URL=$SMS_AERO_URL
           SMS_AERO_LOGIN=$SMS_AERO_LOGIN
           SMS_AERO_TOKEN=$SMS_AERO_TOKEN
+          
+          CP_PUBLIC_ID=$CP_PUBLIC_ID
+          CP_PRIVATE_KEY=$CP_PRIVATE_KEY
           EOF
         shell: bash
 
