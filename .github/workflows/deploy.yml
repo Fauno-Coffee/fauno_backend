@@ -22,6 +22,9 @@ jobs:
           S3_ID: ${{ secrets.S3_ID }}
           S3_KEY: ${{ secrets.S3_KEY }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          SMS_AERO_URL: ${{ secrets.SMS_AERO_URL }}
+          SMS_AERO_LOGIN: ${{ secrets.SMS_AERO_LOGIN }}
+          SMS_AERO_TOKEN: ${{ secrets.SMS_AERO_TOKEN }}
         run: |
           cat <<EOF > .env.production
           DB_NAME=$DB_NAME
@@ -34,6 +37,9 @@ jobs:
           S3_KEY=$S3_KEY
           
           SECRET_KEY=$SECRET_KEY
+          SMS_AERO_URL=$SMS_AERO_URL
+          SMS_AERO_LOGIN=$SMS_AERO_LOGIN
+          SMS_AERO_TOKEN=$SMS_AERO_TOKEN
           EOF
         shell: bash
 
