@@ -66,6 +66,15 @@ const Order = sequelize.define('order', {
   userId: { type: DataTypes.INTEGER, allowNull: false },
   state: { type: DataTypes.STRING, allowNull: false },
   sum: { type: DataTypes.FLOAT, allowNull: false },
+  name: { type: DataTypes.STRING, allowNull: true },
+  phone: { type: DataTypes.STRING, allowNull: true },
+  mail: { type: DataTypes.STRING, allowNull: true },
+  address: { type: DataTypes.STRING, allowNull: true },
+  flat: { type: DataTypes.STRING, allowNull: true },
+  building: { type: DataTypes.STRING, allowNull: true },
+  floor: { type: DataTypes.STRING, allowNull: true },
+  intercom: { type: DataTypes.STRING, allowNull: true },
+  comment: { type: DataTypes.STRING, allowNull: true },
 });
 
 const OrderProduct = sequelize.define('orderProduct', {
