@@ -9,6 +9,8 @@ const { ClientService, ResponseCodes } = require('cloudpayments');
 class OrderController {
     async handle (req, res, next) {
         try {
+            console.log("query")
+            console.log(req.body)
             const client = new ClientService({
                 publicId:  process.env.CP_PUBLIC_ID,
                 privateKey: process.env.CP_PRIVATE_KEY
