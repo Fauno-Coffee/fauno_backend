@@ -135,6 +135,15 @@ class OrderController {
                 if (!order) {
                 return ResponseCodes.FAIL;
                 }
+
+                const user = await User.findByPk(order.userId)
+
+                let discount = 1
+
+                if(user.discount && user.discount > 0){
+                    discount = (1 - user.discount / 100)
+                }
+
                 if (Number(request.Amount) !== Number(order.sum)) {
                 return ResponseCodes.FAIL;
                 }
@@ -148,8 +157,8 @@ class OrderController {
                             return({
                                 label: op.product.name,
                                 quantity: op.count,
-                                price: op.product.price,
-                                amount: op.product.price * op.count,
+                                price: op.product.price * discount,
+                                amount: op.product.price * discount * op.count,
                                 vat: VAT.VAT18,
                             })
                         })
