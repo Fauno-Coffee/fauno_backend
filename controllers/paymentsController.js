@@ -119,6 +119,7 @@ class OrderController {
     
     async check (req, res, next) {
         try {
+            console.log("check request")
             const client = new ClientService({
                 publicId:  process.env.CP_PUBLIC_ID,
                 privateKey: process.env.CP_PRIVATE_KEY
@@ -130,7 +131,6 @@ class OrderController {
             let response;
 
             response = await handlers.handleCheckRequest(req, async (request) => {
-                console.log(request)
                 const order = await Order.findByPk(request.InvoiceId, {include: [{model: OrderProduct, required: true, include: [{model: Product}]}]});
                 if (!order) {
                 return ResponseCodes.FAIL;
@@ -163,8 +163,6 @@ class OrderController {
                             })
                         })
                 }
-                
-                console.log(receiptOptions)
 
                 const response = await receiptApi.createReceipt(
                     { 
@@ -192,7 +190,7 @@ class OrderController {
     async pay (req, res, next) {
         try {
             console.log("pay request")
-            
+
             const client = new ClientService({
                 publicId:  process.env.CP_PUBLIC_ID,
                 privateKey: process.env.CP_PRIVATE_KEY
@@ -201,6 +199,70 @@ class OrderController {
             const handlers = client.getNotificationHandlers();
 
             response = await handlers.handlePayRequest(req, async (request) => {
+                const order = await Order.findByPk(request.InvoiceId);
+                if (!order) return ResponseCodes.FAIL;
+
+                if (order.state === 'paid') {
+                return ResponseCodes.SUCCESS;
+                }
+
+                await order.update({ state: 'paid' });
+                return ResponseCodes.SUCCESS;
+            });
+
+            console.log("Payment checked")
+            return res.json(response);
+
+        } catch (e) {
+            console.log(e)
+            return next(ApiError.badRequest(e.message));
+        }
+    }
+    
+    async confirm (req, res, next) {
+        try {
+            console.log("pay confirm")
+
+            const client = new ClientService({
+                publicId:  process.env.CP_PUBLIC_ID,
+                privateKey: process.env.CP_PRIVATE_KEY
+            });
+
+            const handlers = client.getNotificationHandlers();
+
+            response = await handlers.handleConfirmRequest(req, async (request) => {
+                const order = await Order.findByPk(request.InvoiceId);
+                if (!order) return ResponseCodes.FAIL;
+
+                if (order.state === 'paid') {
+                return ResponseCodes.SUCCESS;
+                }
+
+                await order.update({ state: 'paid' });
+                return ResponseCodes.SUCCESS;
+            });
+
+            console.log("Payment checked")
+            return res.json(response);
+
+        } catch (e) {
+            console.log(e)
+            return next(ApiError.badRequest(e.message));
+        }
+    }
+    
+    async receipt (req, res, next) {
+        try {
+            console.log("receipt query")
+
+            const client = new ClientService({
+                publicId:  process.env.CP_PUBLIC_ID,
+                privateKey: process.env.CP_PRIVATE_KEY
+            });
+
+            const handlers = client.getNotificationHandlers();
+
+            response = await handlers.handleReceiptRequest(req, async (request) => {
                 const order = await Order.findByPk(request.InvoiceId);
                 if (!order) return ResponseCodes.FAIL;
 
