@@ -4,7 +4,7 @@ const sharp = require('sharp');
 const {Category, Product, Order, User, OrderProduct} = require('../models/models');
 const updateUserCategory = require('../utils/updateUserCategory');
 const { Op } = require('sequelize');
-const { ClientService, ResponseCodes, ReceiptTypes, VAT } = require('cloudpayments'); 
+const { ClientService, ResponseCodes, ReceiptTypes, VAT, TaxationSystem } = require('cloudpayments'); 
 
 class OrderController {
     async handle (req, res, next) {
@@ -143,6 +143,7 @@ class OrderController {
                         inn: 502919589904,
                         email: order.mail,
                         phone: order.phone,
+                        taxationSystem: TaxationSystem.GENERAL,
                         Items: order.orderProducts.map((op) => {
                             return({
                                 label: op.product.name,
