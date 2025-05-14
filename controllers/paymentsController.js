@@ -72,6 +72,7 @@ class OrderController {
             });
 
             console.log("Payment checked")
+            console.log(response)
             return res.json(response);
 
         } catch (e) {
