@@ -108,7 +108,7 @@ class OrderController {
             });
 
             console.log("Payment checked")
-            
+
             res.setHeader('Content-Type', 'application/json');
             return res.end(JSON.stringify(response));
 
@@ -137,7 +137,7 @@ class OrderController {
                 return ResponseCodes.SUCCESS;
                 }
 
-                await order.update({ state: 'paid' });
+                await Order.update({ state: 'paid' }, {where: {id: order.id}});
                 return ResponseCodes.SUCCESS;
             });
 
@@ -169,13 +169,14 @@ class OrderController {
                 return ResponseCodes.SUCCESS;
                 }
 
-                await order.update({ state: 'paid' });
+                await Order.update({ state: 'paid' }, {where: {id: order.id}});
                 return ResponseCodes.SUCCESS;
             });
 
             console.log("Payment checked")
             console.log(response)
-            return res.json(response);
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify(response));
 
         } catch (e) {
             console.log(e)
