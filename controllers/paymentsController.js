@@ -123,6 +123,7 @@ class OrderController {
             console.log(req.body)
             console.log(req.params)
             console.log(req.query)
+            
             const client = new ClientService({
                 publicId:  process.env.CP_PUBLIC_ID,
                 privateKey: process.env.CP_PRIVATE_KEY
@@ -135,8 +136,8 @@ class OrderController {
 
             let response;
 
-            response = await handlers.handleCheckRequest(req, async () => {
-                console.log(notification)
+            response = await handlers.handleCheckRequest(req, async (request) => {
+                console.log(request)
                 const order = await Order.findByPk(notification.InvoiceId);
                 if (!order) {
                 return ResponseCodes.FAIL;
