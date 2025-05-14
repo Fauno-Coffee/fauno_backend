@@ -152,6 +152,8 @@ class OrderController {
                             })
                         })
                 }
+                
+                console.log(receiptOptions)
 
                 const response = await receiptApi.createReceipt(
                     { 
@@ -162,7 +164,6 @@ class OrderController {
                     receiptOptions
                 );
 
-                console.log(receiptOptions)
                 
                 return ResponseCodes.SUCCESS;
             });
@@ -171,6 +172,7 @@ class OrderController {
             return res.json(response);
 
         } catch (e) {
+            console.log(e)
             return next(ApiError.badRequest(e.message));
         }
     }
