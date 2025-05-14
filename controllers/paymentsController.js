@@ -119,30 +119,22 @@ class OrderController {
     
     async check (req, res, next) {
         try {
-            console.log("check query")
-            console.log(req.body)
-            console.log(req.params)
-            console.log(req.query)
-            
             const client = new ClientService({
                 publicId:  process.env.CP_PUBLIC_ID,
                 privateKey: process.env.CP_PRIVATE_KEY
             });
-            const handlers = client.getNotificationHandlers();
 
-            // Вся полезная нагрузка CloudPayments лежит в req.body.NotificationObject
-            const type         = req.body.NotificationType;
-            const notification = req.body.NotificationObject || {};
+            const handlers = client.getNotificationHandlers();
 
             let response;
 
             response = await handlers.handleCheckRequest(req, async (request) => {
                 console.log(request)
-                const order = await Order.findByPk(notification.InvoiceId);
+                const order = await Order.findByPk(request.InvoiceId);
                 if (!order) {
                 return ResponseCodes.FAIL;
                 }
-                if (Number(notification.Amount) !== Number(order.sum)) {
+                if (Number(request.Amount) !== Number(order.sum)) {
                 return ResponseCodes.FAIL;
                 }
                 return ResponseCodes.SUCCESS;
