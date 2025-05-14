@@ -188,6 +188,38 @@ class OrderController {
             return next(ApiError.badRequest(e.message));
         }
     }
+    
+    async pay (req, res, next) {
+        try {
+            console.log("pay request")
+            
+            const client = new ClientService({
+                publicId:  process.env.CP_PUBLIC_ID,
+                privateKey: process.env.CP_PRIVATE_KEY
+            });
+
+            const handlers = client.getNotificationHandlers();
+
+            response = await handlers.handlePayRequest(req, async (request) => {
+                const order = await Order.findByPk(request.InvoiceId);
+                if (!order) return ResponseCodes.FAIL;
+
+                if (order.state === 'paid') {
+                return ResponseCodes.SUCCESS;
+                }
+
+                await order.update({ state: 'paid' });
+                return ResponseCodes.SUCCESS;
+            });
+
+            console.log("Payment checked")
+            return res.json(response);
+
+        } catch (e) {
+            console.log(e)
+            return next(ApiError.badRequest(e.message));
+        }
+    }
 }
 
 module.exports = new OrderController()
