@@ -11,6 +11,7 @@ class OrderController {
         try {
             console.log("query")
             console.log(req.body)
+            console.log(req.params)
             const client = new ClientService({
                 publicId:  process.env.CP_PUBLIC_ID,
                 privateKey: process.env.CP_PRIVATE_KEY
