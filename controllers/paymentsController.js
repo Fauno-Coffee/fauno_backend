@@ -4,7 +4,7 @@ const sharp = require('sharp');
 const {Category, Product, Order, User, OrderProduct} = require('../models/models');
 const updateUserCategory = require('../utils/updateUserCategory');
 const { Op } = require('sequelize');
-const { ClientService, ResponseCodes } = require('cloudpayments'); 
+const { ClientService, ResponseCodes, ReceiptTypes, VAT } = require('cloudpayments'); 
 
 class OrderController {
     async handle (req, res, next) {
@@ -125,19 +125,45 @@ class OrderController {
             });
 
             const handlers = client.getNotificationHandlers();
+            const receiptApi = client.getReceiptApi();
 
             let response;
 
             response = await handlers.handleCheckRequest(req, async (request) => {
                 console.log(request)
-                const order = await Order.findByPk(request.InvoiceId);
+                const order = await Order.findByPk(request.InvoiceId, {include: [{model: OrderProduct, required: true, include: [{model: Product}]}]});
                 if (!order) {
                 return ResponseCodes.FAIL;
                 }
                 if (Number(request.Amount) !== Number(order.sum)) {
                 return ResponseCodes.FAIL;
                 }
-                console.log("Payment success")
+
+                const receiptOptions = {
+                        email: order.mail,
+                        phone: order.phone,
+                        Items: order.orderProducts.map((op) => {
+                            return({
+                                label: op.product.name,
+                                quantity: op.count,
+                                price: op.product.price,
+                                amount: op.product.price * op.count,
+                                vat: VAT.VAT18,
+                            })
+                        })
+                }
+
+                const response = await receiptApi.createReceipt(
+                    { 
+                        Type: ReceiptTypes.Income,
+                        invoiceId: request.InvoiceId,
+                        accountId: request.AccountId,
+                    },
+                    receiptOptions
+                );
+
+                console.log(receiptOptions)
+                
                 return ResponseCodes.SUCCESS;
             });
 
