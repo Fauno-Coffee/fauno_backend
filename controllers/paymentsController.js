@@ -73,7 +73,9 @@ class OrderController {
 
             console.log("Payment checked")
             console.log(response)
-            return res.json(response);
+            
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify(response));
 
         } catch (e) {
             console.log(e)
