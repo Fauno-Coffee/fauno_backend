@@ -75,7 +75,7 @@ class OrderController {
             console.log(response)
             
             res.setHeader('Content-Type', 'application/json');
-            return res.end(JSON.stringify(response));
+            return res.end(JSON.stringify(response.response));
 
         } catch (e) {
             console.log(e)
@@ -176,11 +176,11 @@ class OrderController {
             console.log("Payment checked")
             console.log(response)
             res.setHeader('Content-Type', 'application/json');
-            return res.end(JSON.stringify(response));
+            return res.end(JSON.stringify(response.response));
 
         } catch (e) {
             console.log(e)
-            return next(ApiError.badRequest(e.message));
+            return next(ApiError.badRequest(e.message)); 
         }
     }
 }
