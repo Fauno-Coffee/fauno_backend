@@ -140,6 +140,7 @@ class OrderController {
                 }
 
                 const receiptOptions = {
+                        inn: 502919589904,
                         email: order.mail,
                         phone: order.phone,
                         Items: order.orderProducts.map((op) => {
