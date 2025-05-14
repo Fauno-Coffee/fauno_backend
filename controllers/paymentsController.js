@@ -161,6 +161,7 @@ class OrderController {
                         Type: ReceiptTypes.Income,
                         invoiceId: request.InvoiceId,
                         accountId: request.AccountId,
+                        Inn: 502919589904,
                     },
                     receiptOptions
                 );
