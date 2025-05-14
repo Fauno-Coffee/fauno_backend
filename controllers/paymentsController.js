@@ -137,9 +137,11 @@ class OrderController {
                 if (Number(request.Amount) !== Number(order.sum)) {
                 return ResponseCodes.FAIL;
                 }
+                console.log("Payment success")
                 return ResponseCodes.SUCCESS;
             });
 
+            console.log("Payment checked")
             return res.json(response);
 
         } catch (e) {
