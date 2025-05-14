@@ -110,7 +110,7 @@ class OrderController {
             console.log("Payment checked")
 
             res.setHeader('Content-Type', 'application/json');
-            return res.end(JSON.stringify(response));
+            return res.end(JSON.stringify(response.response));
 
         } catch (e) {
             console.log(e)
@@ -164,12 +164,6 @@ class OrderController {
             const response = await handlers.handleReceiptRequest(req, async (request) => {
                 const order = await Order.findByPk(request.InvoiceId);
                 if (!order) return ResponseCodes.FAIL;
-
-                if (order.state === 'paid') {
-                return ResponseCodes.SUCCESS;
-                }
-
-                await Order.update({ state: 'paid' }, {where: {id: order.id}});
                 return ResponseCodes.SUCCESS;
             });
 
