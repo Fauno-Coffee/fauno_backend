@@ -116,6 +116,43 @@ class OrderController {
             return next(ApiError.badRequest(e.message));
         }
     }
+    
+    async check (req, res, next) {
+        try {
+            console.log("check query")
+            console.log(req.body)
+            console.log(req.params)
+            console.log(req.query)
+            const client = new ClientService({
+                publicId:  process.env.CP_PUBLIC_ID,
+                privateKey: process.env.CP_PRIVATE_KEY
+            });
+            const handlers = client.getNotificationHandlers();
+
+            // Вся полезная нагрузка CloudPayments лежит в req.body.NotificationObject
+            const type         = req.body.NotificationType;
+            const notification = req.body.NotificationObject || {};
+
+            let response;
+
+            response = await handlers.handleCheckRequest(req, async () => {
+                console.log(notification)
+                const order = await Order.findByPk(notification.InvoiceId);
+                if (!order) {
+                return ResponseCodes.FAIL;
+                }
+                if (Number(notification.Amount) !== Number(order.sum)) {
+                return ResponseCodes.FAIL;
+                }
+                return ResponseCodes.SUCCESS;
+            });
+
+            return res.json(response);
+
+        } catch (e) {
+            return next(ApiError.badRequest(e.message));
+        }
+    }
 }
 
 module.exports = new OrderController()
