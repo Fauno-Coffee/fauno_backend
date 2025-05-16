@@ -34,7 +34,7 @@ class ProductController {
             })
 
             if (categories.length > 0) {
-                products.category = categories[0]
+                products.category = categories[categories.length-1]
             }
 
             return res.json(products)
