@@ -45,7 +45,7 @@ class ProductController {
             const {
                 name, description, link, price, old_price, categoryId,
                 about, weight, variation, processing, fermentation,
-                region, farmer, keyDescriptor, brightness, recipe
+                region, farmer, keyDescriptor, brightness, recipe, additionalFields
             } = JSON.parse(req.body.data);
 
             let filesPromises = []
@@ -54,7 +54,12 @@ class ProductController {
             if(recipe){
                 recipeJSON = JSON.parse(recipe)
             }
-    
+            
+            let additionalFieldsJSON = ""
+            if(additionalFields){
+                additionalFieldsJSON = JSON.parse(additionalFields)
+            }
+            
             if(files && files.length > 0){
                 console.log("files")
                 console.log(files)
@@ -96,7 +101,8 @@ class ProductController {
                 keyDescriptor,
                 brightness,
                 images: filesData,
-                recipe: recipeJSON
+                recipe: recipeJSON,
+                additionalFields: additionalFieldsJSON,
             });
     
             return res.json(product)
@@ -116,13 +122,18 @@ class ProductController {
             const {
                 name, description, link, price, old_price, categoryId,
                 about, weight, variation, processing, fermentation,
-                region, farmer, keyDescriptor, brightness, recipe
+                region, farmer, keyDescriptor, brightness, recipe, additionalFields
             } = JSON.parse(req.body.data);
 
 
             let recipeJSON = "" 
             if(recipe){
                 recipeJSON = JSON.parse(recipe)
+            }
+
+            let additionalFieldsJSON = ""
+            if(additionalFields){
+                additionalFieldsJSON = JSON.parse(additionalFields)
             }
 
             let filesPromises = []
@@ -166,7 +177,8 @@ class ProductController {
                 keyDescriptor,
                 brightness,
                 images: filesData,
-                recipe: recipeJSON
+                recipe: recipeJSON,
+                additionalFields: additionalFieldsJSON,
             }, {where: {id}});
     
             return res.json(product)

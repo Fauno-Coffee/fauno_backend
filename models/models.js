@@ -56,6 +56,7 @@ const Product = sequelize.define('product', {
   region: { type: DataTypes.STRING, allowNull: true },
   farmer: { type: DataTypes.STRING, allowNull: true },
   keyDescriptor: { type: DataTypes.STRING, allowNull: true },
+  additionalFields: { type: DataTypes.JSON, unique: false, allowNull: false, defaultValue: '' },
   
   brightness: { type: DataTypes.INTEGER, unique: false, defaultValue: 5 },
   
