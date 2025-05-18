@@ -7,7 +7,8 @@ const Op = require('sequelize').Op;
 class ProductController {
     async fetch(req, res, next) {
         try {
-            let { page, limit, categoryId } = req.query
+            let { page, limit, categoryId, regions } = req.query
+
             page = page || 1
             limit = limit || 100
             let offset = page * limit - limit
@@ -25,8 +26,10 @@ class ProductController {
 
             const categoryIds = categories?.map((category) => category.id) || []
 
+            const regionsArray = regions.split(',').filter(reg => !!reg)
             const products = await Product.findAndCountAll({
                 where: {
+                    ...(!!regionsArray?.length ? {region: {[Op.in]: regionsArray}} : {}),
                     isDeleted: false,
                     ...(categoryId ? { categoryId: { [Op.in]: categoryIds } } : {}),
                 },

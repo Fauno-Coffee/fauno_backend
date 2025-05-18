@@ -1,5 +1,7 @@
 const ApiError = require('../error/ApiError')
-const { User, Category, Product } = require('../models/models')
+const { Category, Product } = require('../models/models')
+const { Op } = require('sequelize');
+const sequelize = require('sequelize');
 
 class CategoryController {
     async fetch(req, res, next) {
@@ -14,7 +16,22 @@ class CategoryController {
     async fetchMainCategories(req, res, next) {
         try {
             const categories = await Category.findAll({ where: { isDeleted: false, parentId: null }, order: [['name', 'ASC']] })
-            return res.json(categories)
+
+            const uniqueRegions = await Product.findAll({
+                attributes: [
+                    [sequelize.fn('DISTINCT', sequelize.col('region')), 'region']
+                ],
+                where: {
+                    region: {
+                        [Op.ne]: null // Исключаем null значения
+                    }
+                },
+                raw: true
+            });
+
+            const regions = uniqueRegions.map(item => item.region).filter(Boolean);
+
+            return res.json({categories, regions});
         } catch (e) {
             next(ApiError.badRequest(e.message))
         }
