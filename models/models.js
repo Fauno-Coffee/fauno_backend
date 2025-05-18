@@ -116,6 +116,17 @@ const Recipe = sequelize.define('recipe', {
   isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
 });
 
+const Promotion = sequelize.define('promotion', {
+  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+  imageUrl: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
+  description: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
+  name: { type: DataTypes.TEXT, unique: false, allowNull: false},
+  dateFrom: { type: DataTypes.DATE, unique: false, allowNull: false},
+  dateTo: { type: DataTypes.DATE, unique: false, allowNull: false},
+  
+  isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
+});
+
 const Session = sequelize.define('session', {
   id: {
     type: DataTypes.UUID,
@@ -160,5 +171,6 @@ module.exports = {
   Recipe,
   RecipeCategory,
   Session,
-  BlockData
+  BlockData,
+  Promotion
 };
