@@ -1,7 +1,7 @@
 const ApiError = require('../error/ApiError')
 const { s3 } = require('../db');
 const sharp = require('sharp');
-const {Category, Product, Order, User, OrderProduct} = require('../models/models');
+const {Category, Product, Order, User, OrderProduct, CartProduct} = require('../models/models');
 const updateUserCategory = require('../utils/updateUserCategory');
 const { Op } = require('sequelize');
 const { ClientService, ResponseCodes, ReceiptTypes, VAT, TaxationSystem } = require('cloudpayments'); 
@@ -103,6 +103,7 @@ class OrderController {
                 }
 
                 await Order.update({ state: 'paid' }, {where: {id: order.id}});
+                await CartProduct.destroy({where: {userId: order.userId}})
 
                 return ResponseCodes.SUCCESS;
             });
@@ -138,6 +139,8 @@ class OrderController {
                 }
 
                 await Order.update({ state: 'paid' }, {where: {id: order.id}});
+                await CartProduct.destroy({where: {userId: order.userId}})
+                
                 return ResponseCodes.SUCCESS;
             });
 

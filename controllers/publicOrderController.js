@@ -36,6 +36,11 @@ class OrderController {
                 sum = sum * (1 - user.discount / 100)
             }
 
+            const existingOrder = await Order.findOne({where: {state: "pending", userId}})
+            if(existingOrder){
+                await Order.destroy({where: {id: existingOrder.id}})
+            }
+
             const order = await Order.create({
                 userId, state: 'pending', sum, name, phone, mail,
                 address, flat, building, floor, intercom, comment
