@@ -14,67 +14,87 @@ const newSMSCode = () => {
 
 class UsersController {
   async login(req, res, next) {
-    const {phone, session} = req.body
-
-    if (!phoneUtil.isValidNumberForRegion(phoneUtil.parse(phone, 'RU'), 'RU')) {
-      return next(ApiError.internal('Неверный формат номера'))
-    }
-    const code = newSMSCode()
-
-    const [findedUser, created] = await User.findOrCreate({where: {phone}, defaults: {phone, smsCode: code}});
-
-    if (!created && findedUser?.id && findedUser?.phone) {
-      findedUser.update({smsCode: code})
-    }
-
-    if (code && findedUser?.phone) {
-      try {
-        const url = process.env.SMS_AERO_URL
-        const response = await axios.get(url, {
-          params: {
-            number: findedUser?.phone,
-            text: `Fauno Код подтверждения ${code}`,
-            sign: 'SMS Aero',
-          },
-          headers: {
-            'Authorization': 'Basic ' + Buffer.from(`${process.env.SMS_AERO_LOGIN}:${process.env.SMS_AERO_TOKEN}`).toString('base64'),
-            'Accept': '*/*',
-          },
-        });
-      } catch (e) {
-        console.log(e)
-        return next(ApiError.internal('Ошибка при отправке SMS с кодом подтверждения, попробуйте позднее'))
+    try {
+      const {phone, session} = req.body
+  
+      if (!phoneUtil.isValidNumberForRegion(phoneUtil.parse(phone, 'RU'), 'RU')) {
+        return next(ApiError.internal('Неверный формат номера'))
       }
-    }
+      const code = newSMSCode()
+  
+      const [findedUser, created] = await User.findOrCreate({where: {phone}, defaults: {phone, smsCode: code}});
+  
+      if (!created && findedUser?.id && findedUser?.phone) {
+        findedUser.update({smsCode: code})
+      }
+  
+      if (code && findedUser?.phone) {
+        try {
+          const url = process.env.SMS_AERO_URL
+          const response = await axios.get(url, {
+            params: {
+              number: findedUser?.phone,
+              text: `Fauno Код подтверждения ${code}`,
+              sign: 'SMS Aero',
+            },
+            headers: {
+              'Authorization': 'Basic ' + Buffer.from(`${process.env.SMS_AERO_LOGIN}:${process.env.SMS_AERO_TOKEN}`).toString('base64'),
+              'Accept': '*/*',
+            },
+          });
+        } catch (e) {
+          console.log(e)
+          return next(ApiError.internal('Ошибка при отправке SMS с кодом подтверждения, попробуйте позднее'))
+        }
+      }
+  
+      return res.json(phone)
 
-    return res.json(phone)
+    } catch (e) {
+      next(ApiError.badRequest(e.message))
+    }
+  }
+  
+  async orders(req, res, next) {
+    try {
+      await User.findByPk(req.user.id)
+      const orders = await Order.findAll({where: {userId: req.user.id}})
+      
+      return res.json(orders)
+    } catch (e) {
+      next(ApiError.badRequest(e.message))
+    }
   }
 
   async checkLoginSMSCode(req, res, next) {
     const {phone, smsCode, session} = req.body
 
-    if (!phoneUtil.isValidNumberForRegion(phoneUtil.parse(phone, 'RU'), 'RU')) {
-      return next(ApiError.internal('Неверный формат номера'))
-    }
-
-    const findedUser = await User.findOne({where: {phone}});
-
-    if (findedUser?.id && findedUser?.phone) {
-      if (+findedUser?.smsCode === +smsCode) {
-        findedUser.update({smsCode: null})
-        const token = generateJwt(findedUser.id, findedUser?.name || '', findedUser?.mail || '', findedUser?.role || '')
-
-        if (session) {
-          await CartProduct.update({userId: findedUser.id}, {where: {session, userId: null}})
-        }
-
-        return res.json({token, user: findedUser})
-      } else {
-        next(ApiError.unprocessable('Неверный код'))
+    try {
+      if (!phoneUtil.isValidNumberForRegion(phoneUtil.parse(phone, 'RU'), 'RU')) {
+        return next(ApiError.internal('Неверный формат номера'))
       }
+  
+      const findedUser = await User.findOne({where: {phone}});
+  
+      if (findedUser?.id && findedUser?.phone) {
+        if (+findedUser?.smsCode === +smsCode) {
+          findedUser.update({smsCode: null})
+          const token = generateJwt(findedUser.id, findedUser?.name || '', findedUser?.mail || '', findedUser?.role || '')
+  
+          if (session) {
+            await CartProduct.update({userId: findedUser.id}, {where: {session, userId: null}})
+          }
+  
+          return res.json({token, user: findedUser})
+        } else {
+          next(ApiError.unprocessable('Неверный код'))
+        }
+      }
+  
+      return next(ApiError.internal('Неверные данные пользователя'))
+    } catch (e) {
+      next(ApiError.badRequest(e.message))
     }
-
-    return next(ApiError.internal('Неверные данные пользователя'))
   }
 
   async session(req, res, next) {

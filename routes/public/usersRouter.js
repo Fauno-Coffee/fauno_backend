@@ -15,6 +15,7 @@ router.put('/', authMiddleware, usersController.update)
 // router.delete('/delete', usersController.delete)
 router.get('/session', usersController.session)
 router.get('/cart', usersController.fetchCart)
+router.get('/orders', authMiddleware, usersController.orders)
 router.post('/plusCart', usersController.plusCart)
 router.post('/minusCart', usersController.minusCart)
 
