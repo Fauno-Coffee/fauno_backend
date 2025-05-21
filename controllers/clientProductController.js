@@ -26,7 +26,7 @@ class ProductController {
 
             const categoryIds = categories?.map((category) => category.id) || []
 
-            const regionsArray = regions?.split(',')?.filter(reg => !!reg) || []
+            const regionsArray = JSON.parse(decodeURIComponent(regions));
             const products = await Product.findAndCountAll({
                 where: {
                     ...(!!regionsArray?.length ? {region: {[Op.in]: regionsArray}} : {}),
