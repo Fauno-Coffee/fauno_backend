@@ -4,6 +4,9 @@ const sharp = require('sharp');
 const {Category, Product, Order, User, OrderProduct} = require('../models/models');
 const updateUserCategory = require('../utils/updateUserCategory');
 const { Op } = require('sequelize');
+const fetch = require('node-fetch');
+const CDEK = require('../utils/cdek');
+
 
 class OrderController {
     async create (req, res, next) {
@@ -55,6 +58,42 @@ class OrderController {
                 amount: sum,
                 currency: 'RUB'
             });
+        } catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+    }
+    
+    async city (req, res, next) {
+        try {
+            const {name} = req.query;
+
+            const data = await CDEK.suggestCities(name);
+
+            return res.json(data);
+        } catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+    }
+    
+    async office (req, res, next) {
+        try {
+            const {cityCode} = req.query;
+
+            const data = await CDEK.getOffice(cityCode);
+
+            return res.json(data);
+        } catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+    }
+    
+    async tariffs (req, res, next) {
+        try {
+            const {cityCode, weight} = req.query;
+
+            const data = await CDEK.getTariffs(cityCode, weight);
+
+            return res.json(data);
         } catch (e) {
             next(ApiError.badRequest(e.message))
         }
