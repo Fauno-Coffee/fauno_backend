@@ -1,4 +1,5 @@
-const fetch = require('node-fetch')
+const fetch = require('node-fetch');
+const { Order, OrderProduct, Product } = require('../models/models');
 
 class CdekClient {
   constructor() {
@@ -43,7 +44,92 @@ class CdekClient {
     return res;
   }
 
-  // Пример метода для подсказки городов
+  async createCDEKOrder(orderId) {
+    const order = await Order.findByPk(orderId);
+    const orderProducts = await OrderProduct.findAll({where: {orderId: order.id}, include: [{model: Product}]})
+    let weight = 0
+
+    orderProducts.forEach((op) => {
+      weight += op.count * op.product.weight;
+    })
+
+
+    if(order.deliveryCdekId){
+      const items = orderProducts.map((op)=> { 
+          return ({
+              name: op.product.name,
+              ware_key: `${op.product.id}`,
+              payment: {value: 0},
+              weight: op.product.weight,
+              amount: op.count,
+              cost: op.product.price
+          })
+      })
+
+      const packages = {number: 1, weight, items}
+
+      const body = {
+          type: 1,
+          number: order.id,
+          tariff_code: order.deliveryCdekId,
+          shipment_point: "MSK305",
+          ...(order.cdekOfficeId ? 
+              {delivery_point: order.cdekOfficeId} :
+              {
+                to_location: {
+                  country_code: "RU",
+                  city: order.city,
+                  address: `${order.address}${order.flat ? "кв. " + order.flat : ""}`,
+                }
+              }
+          ),
+          recipient: {
+              name: order.name,
+              phones: [{number: order.phone}]
+          },
+          packages
+      }
+
+      const JSONbody = JSON.stringify(body)
+      
+      const res = await this.request(`orders`, { method: 'POST', body: JSONbody });
+      if (!res.ok) {
+        const JSONres = await res.json();
+        return false
+      };
+
+      const JSONres = await res.json();
+      console.log(JSONres)
+    }
+    return true;
+  }
+
+  async printOrders(uuid) {
+    console.log("printOrders")
+    const JSONBody = JSON.stringify({orders: [{order_uuid: uuid, cdek_number: 0}]})
+
+    console.log(JSONBody)
+
+    const res = await this.request(`print/orders`, { method: 'POST', body: JSONBody });
+    
+    if (!res.ok) {
+      const JSONres = await res.json();
+      console.log(JSONres)
+      return false
+    };
+    const JSONres = await res.json();
+
+    console.log(JSONres)
+    
+    const url = `print/orders/${JSONres.entity.uuid}`
+    console.log(url)
+    const res2 = await this.request(url);
+    console.log("get download")
+    console.log(JSON.stringify(await res2.json()))
+    
+    return "1";
+  }
+
   async suggestCities(name) {
     const res = await this.request(`location/suggest/cities?country_code=RU&name=${encodeURIComponent(name)}`, { method: 'GET' });
     if (!res.ok) throw new Error(res.statusText);

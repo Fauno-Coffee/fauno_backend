@@ -77,6 +77,14 @@ const Order = sequelize.define('order', {
   floor: { type: DataTypes.STRING, allowNull: true },
   intercom: { type: DataTypes.STRING, allowNull: true },
   comment: { type: DataTypes.STRING, allowNull: true },
+  city: { type: DataTypes.STRING, allowNull: true },
+  cdekCityId: { type: DataTypes.INTEGER, allowNull: true },
+  officeName: { type: DataTypes.STRING, allowNull: true },
+  cdekOfficeId: { type: DataTypes.STRING, allowNull: true },
+  type: { type: DataTypes.STRING, allowNull: true },
+  deliveryName: { type: DataTypes.STRING, allowNull: true },
+  deliveryPrice: { type: DataTypes.FLOAT, allowNull: true },
+  deliveryCdekId: { type: DataTypes.INTEGER, allowNull: true },
 });
 
 const OrderProduct = sequelize.define('orderProduct', {

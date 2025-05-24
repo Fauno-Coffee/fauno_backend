@@ -5,6 +5,7 @@ const {Category, Product, Order, User, OrderProduct, CartProduct} = require('../
 const updateUserCategory = require('../utils/updateUserCategory');
 const { Op } = require('sequelize');
 const { ClientService, ResponseCodes, ReceiptTypes, VAT, TaxationSystem } = require('cloudpayments'); 
+const CDEK = require('../utils/cdek');
 
 class OrderController {
     async check (req, res, next) {
@@ -99,11 +100,13 @@ class OrderController {
                 if (!order) return ResponseCodes.FAIL;
 
                 if (order.state === 'paid') {
-                return ResponseCodes.SUCCESS;
+                    await CDEK.createCDEKOrder(order.id)
+                    return ResponseCodes.SUCCESS;
                 }
 
                 await Order.update({ state: 'paid' }, {where: {id: order.id}});
                 await CartProduct.destroy({where: {userId: order.userId}})
+                await CDEK.createCDEKOrder(order.id)
 
                 return ResponseCodes.SUCCESS;
             });
@@ -135,11 +138,13 @@ class OrderController {
                 if (!order) return ResponseCodes.FAIL;
 
                 if (order.state === 'paid') {
+                await CDEK.createCDEKOrder(order.id)
                 return ResponseCodes.SUCCESS;
                 }
 
                 await Order.update({ state: 'paid' }, {where: {id: order.id}});
                 await CartProduct.destroy({where: {userId: order.userId}})
+                await CDEK.createCDEKOrder(order.id)
                 
                 return ResponseCodes.SUCCESS;
             });
