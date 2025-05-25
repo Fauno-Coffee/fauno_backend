@@ -16,18 +16,18 @@ class UsersController {
   async login(req, res, next) {
     try {
       const {phone, session} = req.body
-  
+
       if (!phoneUtil.isValidNumberForRegion(phoneUtil.parse(phone, 'RU'), 'RU')) {
         return next(ApiError.internal('Неверный формат номера'))
       }
       const code = newSMSCode()
-  
+
       const [findedUser, created] = await User.findOrCreate({where: {phone}, defaults: {phone, smsCode: code}});
-  
+
       if (!created && findedUser?.id && findedUser?.phone) {
         findedUser.update({smsCode: code})
       }
-  
+
       if (code && findedUser?.phone) {
         try {
           const url = process.env.SMS_AERO_URL
@@ -47,19 +47,19 @@ class UsersController {
           return next(ApiError.internal('Ошибка при отправке SMS с кодом подтверждения, попробуйте позднее'))
         }
       }
-  
+
       return res.json(phone)
 
     } catch (e) {
       next(ApiError.badRequest(e.message))
     }
   }
-  
+
   async orders(req, res, next) {
     try {
       await User.findByPk(req.user.id)
       const orders = await Order.findAll({where: {userId: req.user.id}})
-      
+
       return res.json(orders)
     } catch (e) {
       next(ApiError.badRequest(e.message))
@@ -73,24 +73,24 @@ class UsersController {
       if (!phoneUtil.isValidNumberForRegion(phoneUtil.parse(phone, 'RU'), 'RU')) {
         return next(ApiError.internal('Неверный формат номера'))
       }
-  
+
       const findedUser = await User.findOne({where: {phone}});
-  
+
       if (findedUser?.id && findedUser?.phone) {
         if (+findedUser?.smsCode === +smsCode) {
           findedUser.update({smsCode: null})
           const token = generateJwt(findedUser.id, findedUser?.name || '', findedUser?.mail || '', findedUser?.role || '')
-  
+
           if (session) {
             await CartProduct.update({userId: findedUser.id}, {where: {session, userId: null}})
           }
-  
+
           return res.json({token, user: findedUser})
         } else {
           next(ApiError.unprocessable('Неверный код'))
         }
       }
-  
+
       return next(ApiError.internal('Неверные данные пользователя'))
     } catch (e) {
       next(ApiError.badRequest(e.message))
@@ -192,7 +192,7 @@ class UsersController {
 
   async plusCart(req, res, next) {
     try {
-      const {userId, session, productId} = req.body;
+      const {userId, session, productId, selectorValue} = req.body;
 
       if (!productId)
         return next(ApiError.badRequest('productId обязателен'));
@@ -211,6 +211,7 @@ class UsersController {
       const cartProduct = await CartProduct.findOne({
         where: {
           productId,
+          selectorValue,
           [Op.or]: or
         }
       });
@@ -218,7 +219,7 @@ class UsersController {
       if (cartProduct) {
         await cartProduct.increment('count');
       } else {
-        const createData = {session, productId, count: 1};
+        const createData = {session, productId, count: 1, selectorValue};
         if (userId) createData.userId = userId;
         await CartProduct.create(createData);
       }
@@ -231,7 +232,7 @@ class UsersController {
 
   async minusCart(req, res, next) {
     try {
-      const {userId, session, productId} = req.body;
+      const {userId, session, productId, selectorValue} = req.body;
 
       const product = await Product.findByPk(productId)
 
@@ -246,6 +247,7 @@ class UsersController {
       const cartProduct = await CartProduct.findOne({
         where: {
           productId,
+          selectorValue,
           [Op.or]: or
         }
       });
