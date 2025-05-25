@@ -212,7 +212,7 @@ class UsersController {
         where: {
           productId,
           ...(!!selectorValue && selectorValue),
-          [Op.or]: orß
+          [Op.or]: or
         }
       });
 
