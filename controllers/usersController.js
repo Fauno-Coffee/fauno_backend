@@ -211,8 +211,8 @@ class UsersController {
       const cartProduct = await CartProduct.findOne({
         where: {
           productId,
-          ...(selectorValue && selectorValue),
-          [Op.or]: or
+          ...(!!selectorValue && selectorValue),
+          [Op.or]: orß
         }
       });
 
@@ -247,7 +247,7 @@ class UsersController {
       const cartProduct = await CartProduct.findOne({
         where: {
           productId,
-          ...(selectorValue && selectorValue),
+          ...(!!selectorValue && selectorValue),
           [Op.or]: or
         }
       });
