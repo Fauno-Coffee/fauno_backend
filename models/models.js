@@ -45,10 +45,10 @@ const Product = sequelize.define('product', {
   old_price: { type: DataTypes.FLOAT, unique: false, allowNull: false, defaultValue: 0 },
   categoryId: { type: DataTypes.INTEGER, unique: false, allowNull: true },
   count: { type: DataTypes.INTEGER, unique: false, defaultValue: 0 },
-  
+
   about: { type: DataTypes.TEXT, unique: false, allowNull: false, defaultValue: '' },
   recipe: { type: DataTypes.JSON, unique: false, allowNull: true },
-  
+
   weight: { type: DataTypes.INTEGER, unique: false, allowNull: true },
   variation: {type: DataTypes.ARRAY(DataTypes.STRING)},
   processing: {type: DataTypes.ARRAY(DataTypes.STRING)},
@@ -57,9 +57,10 @@ const Product = sequelize.define('product', {
   farmer: { type: DataTypes.STRING, allowNull: true },
   keyDescriptor: { type: DataTypes.STRING, allowNull: true },
   additionalFields: { type: DataTypes.JSON, unique: false, allowNull: false, defaultValue: '' },
-  
+  selector: { type: DataTypes.JSON, unique: false, allowNull: false, defaultValue: '' },
+
   brightness: { type: DataTypes.INTEGER, unique: false, defaultValue: 5 },
-  
+
   isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
 });
 
@@ -108,7 +109,7 @@ const RecipeCategory = sequelize.define('recipeCategory', {
   description: { type: DataTypes.TEXT, unique: false, allowNull: false},
   imageUrl: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
   previewUrl: { type: DataTypes.STRING, unique: false, allowNull: false, defaultValue: '' },
-  
+
   isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
 });
 
@@ -121,7 +122,7 @@ const Recipe = sequelize.define('recipe', {
   name: { type: DataTypes.TEXT, unique: false, allowNull: false},
   steps: { type: DataTypes.JSON, unique: false, allowNull: false},
   productId: { type: DataTypes.INTEGER, allowNull: true },
-  
+
   isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
 });
 
@@ -132,7 +133,7 @@ const Promotion = sequelize.define('promotion', {
   name: { type: DataTypes.TEXT, unique: false, allowNull: false},
   dateFrom: { type: DataTypes.DATE, unique: false, allowNull: false},
   dateTo: { type: DataTypes.DATE, unique: false, allowNull: false},
-  
+
   isDeleted: { type: DataTypes.BOOLEAN, unique: false, defaultValue: false },
 });
 
