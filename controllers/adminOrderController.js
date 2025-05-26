@@ -12,7 +12,7 @@ class OrderController {
             limit = limit || 20
             let offset = page * limit - limit
             const orders = await Order.findAndCountAll({
-                limit, offset, order: [['createdAt', 'ASC']], 
+                limit, offset, order: [['createdAt', 'DESC']], 
                 include: [
                     {model: OrderProduct, required: false, include: [{model: Product, required: true}]}, 
                     {model: User, required: false}
