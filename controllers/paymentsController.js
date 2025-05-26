@@ -106,6 +106,8 @@ class OrderController {
 
                 await Order.update({ state: 'paid' }, {where: {id: order.id}});
                 await CartProduct.destroy({where: {userId: order.userId}})
+
+                await updateUserCategory(order.userId)
                 await CDEK.createCDEKOrder(order.id)
 
                 return ResponseCodes.SUCCESS;
@@ -144,6 +146,8 @@ class OrderController {
 
                 await Order.update({ state: 'paid' }, {where: {id: order.id}});
                 await CartProduct.destroy({where: {userId: order.userId}})
+
+                await updateUserCategory(order.userId)
                 await CDEK.createCDEKOrder(order.id)
                 
                 return ResponseCodes.SUCCESS;
