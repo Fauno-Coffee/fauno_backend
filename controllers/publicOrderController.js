@@ -27,7 +27,7 @@ class OrderController {
             
             let sum = 0;
             let weight = 0;
-            products.forEach(({productId,count}) => {
+            products.forEach(({productId, count}) => {
                 const prod = dbProds.find(p=>p.id===productId);
                 sum += prod.price * count;
                 weight += prod.weight * count;
@@ -76,7 +76,7 @@ class OrderController {
 
 
             await OrderProduct.bulkCreate(
-                products.map(p=>({ orderId: order.id, productId: p.productId, count: p.count }))
+                products.map(p=>({ orderId: order.id, productId: p.productId, count: p.count, selectorValue: p.selectorValue }))
             );
 
             return res.status(200).json({
