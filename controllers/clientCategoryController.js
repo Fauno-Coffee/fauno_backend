@@ -24,7 +24,8 @@ class CategoryController {
                 where: {
                     region: {
                         [Op.ne]: null // Исключаем null значения
-                    }
+                    },
+                    isDeleted: false
                 },
                 raw: true
             });
