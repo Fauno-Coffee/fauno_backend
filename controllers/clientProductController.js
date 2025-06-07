@@ -49,7 +49,14 @@ class ProductController {
   async fetchOne(req, res, next) {
     try {
       const {link} = req.params;
-      const product = await Product.findOne({where: {link}, include: [{model: Category}]})
+      const product = await Product.findOne({
+        where: {link}, include: [{
+          model: Category, include: [{
+            model: Category,
+            as: 'parentCategory'
+          }]
+        }]
+      })
       return res.json(product)
     } catch (e) {
       next(ApiError.badRequest(e.message))
