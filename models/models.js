@@ -152,10 +152,9 @@ const Session = sequelize.define('session', {
 Product.belongsTo(Category)
 Category.hasMany(Product);
 
-Category.hasOne(Category, {
-  as: 'parentCategory', // Название ассоциации
-  foreignKey: 'parentId', // Поле, которое ссылается на родителя
-  sourceKey: 'id', // Поле текущей модели (необязательно, по умолчанию 'id')
+Category.belongsTo(Category, {
+  as: 'parentCategory',
+  foreignKey: 'parentId'
 });
 
 Session.belongsTo(User)
