@@ -50,7 +50,7 @@ class OrderController {
                                 quantity: op.count,
                                 price: op.product.price * discount,
                                 amount: op.product.price * discount * op.count,
-                                vat: VAT.VAT18,
+                                vat: 5,
                             })
                         })
                 }

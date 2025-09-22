@@ -1,7 +1,8 @@
 const ApiError = require('../error/ApiError')
 const {s3} = require('../db');
 const sharp = require('sharp');
-const {Category, Product} = require('../models/models')
+const {Category, Product} = require('../models/models');
+const { v4 } = require('uuid');
 
 class ProductController {
   async fetch(req, res, next) {
@@ -208,7 +209,8 @@ class ProductController {
   async delete(req, res, next) {
     try {
       let {id} = req.query;
-      await Product.update({isDeleted: true}, {where: {id}})
+      const uid = v4()
+      await Product.update({link: uid, isDeleted: true}, {where: {id}})
       return res.json("Deleted successfully");
     } catch (e) {
       next(ApiError.badRequest(e.message))

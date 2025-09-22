@@ -2,6 +2,7 @@ const ApiError = require('../error/ApiError')
 const {Product, Order, User, OrderProduct} = require('../models/models');
 const { Op } = require('sequelize');
 const CDEK = require('../utils/cdek');
+const BOXBERRY = require('../utils/boxberry');
 
 
 class OrderController {
@@ -10,7 +11,8 @@ class OrderController {
             const {
                 userId, phone, products, name, mail, city,
                 cityId, selectedDelivery, officeName, officeId,
-                address, flat, building, floor, intercom, comment
+                address, flat, building, floor, intercom, comment,
+                boxberryCityId, boxberryOfficeId, boxberryOfficeName
             } = req.body;
 
             if (!userId || !name || !phone || !mail || !products?.length){
@@ -51,6 +53,9 @@ class OrderController {
             if(selectedDelivery.cdekId){
                 type = "cdek"
             }
+            if(selectedDelivery.boxberryOfficeRequired){
+                type = "boxberry"
+            }
 
             let deliveryName = ""
             let deliveryPrice = undefined
@@ -70,8 +75,17 @@ class OrderController {
             const order = await Order.create({
                 userId, state: 'pending', sum, name, phone, mail,
                 address, flat, building, floor, intercom, comment,
-                city, cdekCityId: cityId, officeName, cdekOfficeId: officeId, type,
-                deliveryName, deliveryPrice, deliveryCdekId
+                city, deliveryName, deliveryPrice,
+                
+                cdekCityId: cityId, 
+                officeName, 
+                cdekOfficeId: 
+                officeId, type,
+                deliveryCdekId,
+
+                boxberryCityId,
+                boxberryOfficeId,
+                boxberryOfficeName,
             });
 
 
@@ -103,11 +117,16 @@ class OrderController {
     
     async office (req, res, next) {
         try {
-            const {cityCode} = req.query;
+            const {cityCode, cityName} = req.query;
 
-            const data = await CDEK.getOffice(cityCode);
+            const offecies = await CDEK.getOffice(cityCode);
+            const boxberryCityId = await BOXBERRY.getCity(cityName)
+            let boxberryOffices = []
+            if(boxberryCityId){
+                boxberryOffices = await BOXBERRY.getOffice(boxberryCityId);
+            }
 
-            return res.json(data);
+            return res.json({offecies, boxberryCityId, boxberryOffices});
         } catch (e) {
             next(ApiError.badRequest(e.message))
         }
@@ -115,9 +134,10 @@ class OrderController {
     
     async tariffs (req, res, next) {
         try {
-            const {cityCode, weight} = req.query;
+            const {cityCode, boxberryCityId, weight} = req.query;
 
             const data = await CDEK.getTariffs(cityCode, weight);
+            const bdata = await BOXBERRY.getTariffs(boxberryCityId, weight)
 
             const { tariff_codes = [] } = data;
 
@@ -132,8 +152,12 @@ class OrderController {
                 const door = byType('склад-дверь')[0];
                 const pvz = byType('склад-склад')[0];
 
-                if (door) options.push({ name: 'CDEK до двери', days: door.period_min, price: door.delivery_sum, cdekId: door.tariff_code, addressRequired: true, cdekOfficeRequired: false });
-                if (pvz) options.push({ name: 'CDEK до пункта выдачи', days: pvz.period_min, price: pvz.delivery_sum, cdekId: pvz.tariff_code, addressRequired: false, cdekOfficeRequired: true });
+                if (door) options.push({ name: 'CDEK до двери', days: door.period_min, price: door.delivery_sum, cdekId: door.tariff_code, addressRequired: true, cdekOfficeRequired: false, boxberryOfficeRequired: false });
+                if (pvz) options.push({ name: 'CDEK до пункта выдачи', days: pvz.period_min, price: pvz.delivery_sum, cdekId: pvz.tariff_code, addressRequired: false, cdekOfficeRequired: true, boxberryOfficeRequired: false });
+            }
+            
+            for (let tariff of bdata){
+                options.push({ name: 'Boxberry до пункта выдачи', days: tariff.DeliveryPeriod, price: tariff.TotalPrice, cdekId: undefined, addressRequired: false, cdekOfficeRequired: false, boxberryOfficeRequired: true })
             }
 
             return res.json(options);

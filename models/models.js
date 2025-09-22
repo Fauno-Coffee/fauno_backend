@@ -86,6 +86,9 @@ const Order = sequelize.define('order', {
   deliveryName: {type: DataTypes.STRING, allowNull: true},
   deliveryPrice: {type: DataTypes.FLOAT, allowNull: true},
   deliveryCdekId: {type: DataTypes.INTEGER, allowNull: true},
+  boxberryCityId: {type: DataTypes.TEXT, allowNull: true},
+  boxberryOfficeId: {type: DataTypes.TEXT, allowNull: true},
+  boxberryOfficeName: {type: DataTypes.TEXT, allowNull: true},
 });
 
 const OrderProduct = sequelize.define('orderProduct', {
